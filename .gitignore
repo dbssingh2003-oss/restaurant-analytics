@@ -1,0 +1,24 @@
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Environment variables
+.env
+.env.*
+
+# Frontend dependencies
+node_modules/
+dist/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local databases and private uploads
+*.db
+data/uploads/
+data/private/
