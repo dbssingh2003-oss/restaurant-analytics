@@ -87,3 +87,34 @@ def test_analytics_empty_dataset():
         match="Dataset contains no data rows",
     ):
         calculate_analytics(df, "sales.csv")
+
+
+def test_category_aggregation():
+    df = pd.DataFrame({
+        "order_id": [101, 102, 103, 104],
+        "order_date": [
+            "2026-01-01",
+            "2026-01-01",
+            "2026-01-02",
+            "2026-01-02",
+        ],
+        "quantity": [2, 3, 1, 2],
+        "unit_price": [100, 150, 200, 100],
+        "category": [
+            "Main Course",
+            "Main Course",
+            "Beverages",
+            "Beverages",
+        ],
+    })
+
+    result = calculate_analytics(df, "sales.csv")
+
+    main_course = next(
+        item for item in result.top_categories
+        if item.name == "Main Course"
+    )
+
+    assert main_course.revenue == pytest.approx(650)
+    assert main_course.quantity_sold == pytest.approx(5)
+

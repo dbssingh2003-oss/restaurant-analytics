@@ -1,0 +1,14 @@
+
+order_id,order_date,quantity,unit_price,product_name,category
+1001,2026-02-01,2,250,Veg Burger,Main Course
+1001,2026-02-01,1,120,French Fries,Sides
+1002,2026-02-01,1,250,Veg Burger,Main Course
+1002,2026-02-01,2,80,Cold Coffee,Beverages
+1003,2026-02-02,2,300,Paneer Pizza,Main Course
+1003,2026-02-02,1,120,French Fries,Sides
+1004,2026-02-02,1,300,Paneer Pizza,Main Course
+1004,2026-02-02,2,80,Cold Coffee,Beverages
+1005,2026-02-03,3,150,Pasta,Main Course
+1005,2026-02-03,1,120,French Fries,Sides
+1006,2026-02-03,2,80,Cold Coffee,Beverages
+1006,2026-02-03,1,250,Veg Burger,Main Course
