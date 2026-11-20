@@ -25,7 +25,7 @@ def validate_dataset(
         for column in df.columns
     ]
 
-    # Detect duplicate column names
+    # Detect duplicate column names after normalization
     duplicate_columns = (
         normalized_df.columns[
             normalized_df.columns.duplicated()
@@ -63,7 +63,6 @@ def validate_dataset(
         )
 
     # Check missing order IDs
-    # Skip this check if order_id is duplicated
     if (
         "order_id" in normalized_df.columns
         and "order_id" not in duplicate_columns
@@ -75,10 +74,9 @@ def validate_dataset(
             )
 
     # Validate dates and numeric values
-    # Skip validation if columns are missing or duplicated
     if not missing_columns and not duplicate_columns and not df.empty:
 
-        # Validate dates
+        # Validate order dates
         invalid_dates = to_datetime(
             normalized_df["order_date"],
             errors="coerce"
@@ -97,15 +95,30 @@ def validate_dataset(
                 errors="coerce"
             )
 
+            # Check missing or non-numeric values
             if values.isna().any():
                 errors.append(
                     f"Column '{column}' contains "
                     "non-numeric or missing values."
                 )
 
+            # Detect positive and negative infinity
+            infinite_values = values.isin([
+                float("inf"),
+                float("-inf")
+            ])
+
+            if infinite_values.any():
+                errors.append(
+                    f"Column '{column}' contains infinite values."
+                )
+
+            # Exclude infinite and missing values
+            valid_values = values[~infinite_values].dropna()
+
             # Quantity must be greater than zero
             if column == "quantity" and (
-                values.dropna() <= 0
+                valid_values <= 0
             ).any():
                 errors.append(
                     "Quantity must be greater than zero."
@@ -113,7 +126,7 @@ def validate_dataset(
 
             # Unit price cannot be negative
             if column == "unit_price" and (
-                values.dropna() < 0
+                valid_values < 0
             ).any():
                 errors.append(
                     "Unit price cannot be negative."
@@ -129,4 +142,3 @@ def validate_dataset(
         errors=errors,
         warnings=warnings,
     )
-
