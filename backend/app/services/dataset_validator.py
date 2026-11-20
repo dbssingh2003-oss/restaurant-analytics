@@ -19,11 +19,13 @@ def validate_dataset(
 
     normalized_df = df.copy()
 
+    # Normalize column names
     normalized_df.columns = [
         str(column).strip().lower()
         for column in df.columns
     ]
 
+    # Find missing required columns
     missing_columns = [
         column
         for column in REQUIRED_COLUMNS
@@ -46,9 +48,17 @@ def validate_dataset(
             "The uploaded dataset contains no data rows."
         )
 
+    # Check missing order IDs
+    if "order_id" in normalized_df.columns and not df.empty:
+        if normalized_df["order_id"].isna().any():
+            errors.append(
+                "Column 'order_id' contains missing values."
+            )
+
     # Validate dates and numeric values
     if not missing_columns and not df.empty:
 
+        # Validate dates
         invalid_dates = to_datetime(
             normalized_df["order_date"],
             errors="coerce"
@@ -59,6 +69,7 @@ def validate_dataset(
                 "Column 'order_date' contains invalid dates."
             )
 
+        # Validate quantity and unit price
         for column in ["quantity", "unit_price"]:
 
             values = to_numeric(
@@ -86,6 +97,7 @@ def validate_dataset(
                     "Unit price cannot be negative."
                 )
 
+    # Return validation response
     return DatasetValidationResponse(
         filename=filename,
         is_valid=len(errors) == 0,
@@ -95,4 +107,3 @@ def validate_dataset(
         errors=errors,
         warnings=warnings,
     )
-

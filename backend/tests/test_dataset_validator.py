@@ -101,3 +101,19 @@ def test_non_numeric_quantity():
     assert result.is_valid is False
     assert any("non-numeric" in error for error in result.errors)
 
+
+def test_missing_order_id():
+    df = pd.DataFrame({
+        "order_id": [101, None],
+        "order_date": ["2026-01-01", "2026-01-02"],
+        "quantity": [2, 3],
+        "unit_price": [150, 200],
+    })
+
+    result = validate_dataset(df, "sales.csv")
+
+    assert result.is_valid is False
+    assert any(
+        "order_id" in error.lower()
+        for error in result.errors
+    )
