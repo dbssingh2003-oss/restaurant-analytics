@@ -57,7 +57,10 @@ def test_invalid_date():
     result = validate_dataset(df, "sales.csv")
 
     assert result.is_valid is False
-    assert any("invalid dates" in error for error in result.errors)
+    assert any(
+        "invalid dates" in error
+        for error in result.errors
+    )
 
 
 def test_zero_quantity():
@@ -99,7 +102,10 @@ def test_non_numeric_quantity():
     result = validate_dataset(df, "sales.csv")
 
     assert result.is_valid is False
-    assert any("non-numeric" in error for error in result.errors)
+    assert any(
+        "non-numeric" in error
+        for error in result.errors
+    )
 
 
 def test_missing_order_id():
@@ -115,5 +121,26 @@ def test_missing_order_id():
     assert result.is_valid is False
     assert any(
         "order_id" in error.lower()
+        for error in result.errors
+    )
+
+
+def test_duplicate_column_names_after_normalization():
+    df = pd.DataFrame(
+        [[101, 999, "2026-01-01", 2, 150]],
+        columns=[
+            "order_id",
+            " Order_ID ",
+            "order_date",
+            "quantity",
+            "unit_price",
+        ],
+    )
+
+    result = validate_dataset(df, "sales.csv")
+
+    assert result.is_valid is False
+    assert any(
+        "duplicate" in error.lower()
         for error in result.errors
     )

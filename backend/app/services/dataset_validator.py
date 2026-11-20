@@ -25,6 +25,13 @@ def validate_dataset(
         for column in df.columns
     ]
 
+    # Detect duplicate column names
+    duplicate_columns = (
+        normalized_df.columns[
+            normalized_df.columns.duplicated()
+        ].unique().tolist()
+    )
+
     # Find missing required columns
     missing_columns = [
         column
@@ -42,6 +49,13 @@ def validate_dataset(
             + ", ".join(missing_columns)
         )
 
+    # Check duplicate columns
+    if duplicate_columns:
+        errors.append(
+            "Duplicate column names after normalization: "
+            + ", ".join(duplicate_columns)
+        )
+
     # Check empty dataset
     if df.empty:
         errors.append(
@@ -49,14 +63,20 @@ def validate_dataset(
         )
 
     # Check missing order IDs
-    if "order_id" in normalized_df.columns and not df.empty:
+    # Skip this check if order_id is duplicated
+    if (
+        "order_id" in normalized_df.columns
+        and "order_id" not in duplicate_columns
+        and not df.empty
+    ):
         if normalized_df["order_id"].isna().any():
             errors.append(
                 "Column 'order_id' contains missing values."
             )
 
     # Validate dates and numeric values
-    if not missing_columns and not df.empty:
+    # Skip validation if columns are missing or duplicated
+    if not missing_columns and not duplicate_columns and not df.empty:
 
         # Validate dates
         invalid_dates = to_datetime(
@@ -83,6 +103,7 @@ def validate_dataset(
                     "non-numeric or missing values."
                 )
 
+            # Quantity must be greater than zero
             if column == "quantity" and (
                 values.dropna() <= 0
             ).any():
@@ -90,6 +111,7 @@ def validate_dataset(
                     "Quantity must be greater than zero."
                 )
 
+            # Unit price cannot be negative
             if column == "unit_price" and (
                 values.dropna() < 0
             ).any():
@@ -107,3 +129,4 @@ def validate_dataset(
         errors=errors,
         warnings=warnings,
     )
+
